@@ -6,7 +6,7 @@ export default function Hero() {
       </h1>
 
       <p className="mt-3 text-lg">
-        Discover authentic handmade products and support local artisans.
+        Discover authentic handmade products and empower local artisans.
       </p>
 
       <button className="mt-4 bg-orange-700 text-white px-6 py-3 rounded">
