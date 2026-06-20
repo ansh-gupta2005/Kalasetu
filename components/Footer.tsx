@@ -4,7 +4,7 @@ export default function Footer() {
       <p>© 2026 KalaSetu</p>
 
       <div className="mt-2">
-        Facebook | Instagram | Twitter
+        Facebook | Instagram | Twitter | YouTube
       </div>
     </footer>
   );
