@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "KalaSetu",
-  description: "Artisan Marketplace",
+  description: "Connecting Artisans with the World",
 };
 
 export default function RootLayout({
@@ -27,12 +27,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+      <body className="transition-colors duration-300">
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

@@ -3,17 +3,19 @@
 import { useTheme } from "./ThemeContext";
 
 export default function ThemeToggle() {
-  const { darkMode, toggleTheme } =
-    useTheme();
+  const { darkMode, toggleTheme } = useTheme();
 
   return (
     <button
       onClick={toggleTheme}
-      className="bg-white text-black px-3 py-1 rounded"
+      className={`px-4 py-2 rounded-full font-medium transition-all duration-300 shadow-md
+      ${
+        darkMode
+          ? "bg-yellow-400 text-black hover:bg-yellow-300"
+          : "bg-gray-900 text-white hover:bg-gray-700"
+      }`}
     >
-      {darkMode
-        ? "☀️ Light"
-        : "🌙 Dark"}
+      {darkMode ? "☀ Light" : "🌙 Dark"}
     </button>
   );
 }

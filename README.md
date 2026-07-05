@@ -54,3 +54,42 @@ npm run dev
 5. Open
 
 http://localhost:5000
+
+# Database Choice
+
+The KalaSetu project uses **MongoDB Atlas** as the database.
+
+MongoDB was selected because it is flexible, easy to integrate with Node.js, and suitable for storing artisan product information.
+
+---
+
+# Database Schema
+
+Product
+
+- _id
+- name
+- category
+- price
+- description
+
+---
+
+# Database Setup
+
+1. Create a MongoDB Atlas account.
+2. Create a free M0 cluster.
+3. Create a database user.
+4. Allow network access.
+5. Copy the MongoDB connection string.
+6. Add the connection string in `.env` as:
+
+MONGO_URI=your_connection_string
+
+7. Install dependencies
+
+npm install
+
+8. Start the backend
+
+npm run dev
