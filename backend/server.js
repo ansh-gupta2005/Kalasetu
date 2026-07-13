@@ -5,13 +5,22 @@ require("dotenv").config();
 
 const Product = require("./models/Product");
 
+// NEW
+const authRoutes = require("./routes/authRoutes");
+
 const app = express();
 
+// ==============================
 // Middleware
+// ==============================
+
 app.use(cors());
 app.use(express.json());
 
+// ==============================
 // MongoDB Connection
+// ==============================
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
@@ -21,7 +30,16 @@ mongoose
     console.log(err);
   });
 
+// ==============================
+// Auth Routes
+// ==============================
+
+app.use("/api/auth", authRoutes);
+
+// ==============================
 // Home Route
+// ==============================
+
 app.get("/", (req, res) => {
   res.json({
     message: "KalaSetu API Running",
@@ -31,9 +49,11 @@ app.get("/", (req, res) => {
 // ==============================
 // GET ALL PRODUCTS
 // ==============================
+
 app.get("/api/products", async (req, res) => {
   try {
     const products = await Product.find();
+
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({
@@ -45,6 +65,7 @@ app.get("/api/products", async (req, res) => {
 // ==============================
 // GET SINGLE PRODUCT
 // ==============================
+
 app.get("/api/products/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -66,6 +87,7 @@ app.get("/api/products/:id", async (req, res) => {
 // ==============================
 // CREATE PRODUCT
 // ==============================
+
 app.post("/api/products", async (req, res) => {
   try {
     const product = await Product.create(req.body);
@@ -81,6 +103,7 @@ app.post("/api/products", async (req, res) => {
 // ==============================
 // UPDATE PRODUCT
 // ==============================
+
 app.put("/api/products/:id", async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(
@@ -108,6 +131,7 @@ app.put("/api/products/:id", async (req, res) => {
 // ==============================
 // DELETE PRODUCT
 // ==============================
+
 app.delete("/api/products/:id", async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
@@ -131,6 +155,7 @@ app.delete("/api/products/:id", async (req, res) => {
 // ==============================
 // SEARCH PRODUCT
 // ==============================
+
 app.get("/api/products/search/:name", async (req, res) => {
   try {
     const products = await Product.find({
@@ -148,7 +173,10 @@ app.get("/api/products/search/:name", async (req, res) => {
   }
 });
 
+// ==============================
 // Server
+// ==============================
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

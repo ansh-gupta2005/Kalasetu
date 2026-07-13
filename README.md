@@ -93,3 +93,39 @@ npm install
 8. Start the backend
 
 npm run dev
+## Database Schema
+
+![Schema Diagram](schema.png)
+
+# Week 6 - Authentication & Authorization
+
+## Features Implemented
+
+- User Registration
+- User Login
+- Password Hashing using bcrypt
+- JWT Authentication
+- Protected Routes
+- Role-Based Authorization
+
+## APIs
+
+POST /api/auth/register
+
+POST /api/auth/login
+
+GET /api/auth/profile
+
+GET /api/auth/seller
+
+GET /api/auth/admin
+
+## Technologies Used
+
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- bcryptjs
+- jsonwebtoken
+- dotenv
