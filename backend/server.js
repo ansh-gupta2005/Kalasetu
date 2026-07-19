@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
+const aiRoutes = require("./routes/aiRoutes");
 
 const Product = require("./models/Product");
 
@@ -35,6 +36,7 @@ mongoose
 // ==============================
 
 app.use("/api/auth", authRoutes);
+app.use("/api/ai", aiRoutes);
 
 // ==============================
 // Home Route
