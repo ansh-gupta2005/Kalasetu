@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState([]);
+  const router = useRouter();
+
+  const [products, setProducts] = useState<any[]>([]);
 
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
@@ -13,21 +16,47 @@ export default function ProductsPage() {
   const [editingId, setEditingId] = useState("");
   const [loadingAI, setLoadingAI] = useState(false);
 
-  // Fetch Products
-  const fetchProducts = async () => {
-    const res = await fetch("http://localhost:5000/api/products");
-    const data = await res.json();
-    setProducts(data);
-  };
+  // =============================
+  // Authentication + Fetch Products
+  // =============================
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    const token = localStorage.getItem("token");
 
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    fetchProducts();
+  }, [router]);
+
+  // =============================
+  // Fetch Products
+  // =============================
+
+  const fetchProducts = async () => {
+  try {
+    const res = await fetch("http://localhost:5000/api/products");
+
+    const data = await res.json();
+
+    console.log("Products from API:", data);
+
+    setProducts(data);
+  } catch (error) {
+    console.log(error);
+    alert("Unable to fetch products.");
+  }
+};
+
+  // =============================
   // AI Description Generator
+  // =============================
+
   const generateDescription = async () => {
     if (!name || !category) {
-      alert("Please enter Product Name and Category first.");
+      alert("Please enter Product Name and Category.");
       return;
     }
 
@@ -42,7 +71,7 @@ export default function ProductsPage() {
         body: JSON.stringify({
           productName: name,
           material: "Handmade",
-          category: category,
+          category,
         }),
       });
 
@@ -54,87 +83,138 @@ export default function ProductsPage() {
         alert(data.message);
       }
     } catch (error) {
-      console.error(error);
+      console.log(error);
       alert("AI Generation Failed");
     }
 
     setLoadingAI(false);
   };
 
+  // =============================
   // Add Product
+  // =============================
+
   const addProduct = async () => {
-    await fetch("http://localhost:5000/api/products", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        category,
-        price: Number(price),
-        description,
-      }),
-    });
+    if (!name || !category || !price || !description) {
+      alert("Please fill all fields.");
+      return;
+    }
 
-    setName("");
-    setCategory("");
-    setPrice("");
-    setDescription("");
+    try {
+      await fetch("http://localhost:5000/api/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          category,
+          price: Number(price),
+          description,
+        }),
+      });
 
-    fetchProducts();
+      alert("Product Added Successfully!");
+
+      setName("");
+      setCategory("");
+      setPrice("");
+      setDescription("");
+
+      fetchProducts();
+
+    } catch (error) {
+      console.log(error);
+      alert("Unable to add product.");
+    }
   };
 
+  // =============================
   // Delete Product
-  const deleteProduct = async (id: string) => {
-    await fetch(`http://localhost:5000/api/products/${id}`, {
-      method: "DELETE",
-    });
+  // =============================
 
-    fetchProducts();
+  const deleteProduct = async (id: string) => {
+    try {
+      await fetch(`http://localhost:5000/api/products/${id}`, {
+        method: "DELETE",
+      });
+
+      alert("Product Deleted Successfully!");
+
+      fetchProducts();
+
+    } catch (error) {
+      console.log(error);
+      alert("Unable to delete product.");
+    }
   };
 
+  // =============================
   // Edit Product
+  // =============================
+
   const editProduct = (product: any) => {
     setEditingId(product._id);
     setName(product.name);
     setCategory(product.category);
-    setPrice(product.price);
+    setPrice(product.price.toString());
     setDescription(product.description);
   };
 
+  // =============================
   // Update Product
+  // =============================
+
   const updateProduct = async () => {
-    await fetch(`http://localhost:5000/api/products/${editingId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        category,
-        price: Number(price),
-        description,
-      }),
-    });
+    if (!name || !category || !price || !description) {
+      alert("Please fill all fields.");
+      return;
+    }
 
-    setEditingId("");
+    try {
+      await fetch(
+        `http://localhost:5000/api/products/${editingId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            category,
+            price: Number(price),
+            description,
+          }),
+        }
+      );
 
-    setName("");
-    setCategory("");
-    setPrice("");
-    setDescription("");
+      alert("Product Updated Successfully!");
 
-    fetchProducts();
+      setEditingId("");
+
+      setName("");
+      setCategory("");
+      setPrice("");
+      setDescription("");
+
+      fetchProducts();
+
+    } catch (error) {
+      console.log(error);
+      alert("Unable to update product.");
+    }
   };
-
-  return (
+  console.log("Products State:", products);
+    return (
     <div className="max-w-5xl mx-auto p-8">
 
-      <h1 className="text-4xl font-bold mb-8">
+      <h1 className="text-4xl font-bold mb-8 text-center">
         KalaSetu Product Manager
       </h1>
 
-      <div className="space-y-4 bg-gray-100 p-6 rounded-lg shadow">
+      {/* Product Form */}
+
+      <div className="bg-gray-100 p-6 rounded-lg shadow space-y-4">
 
         <input
           className="border p-3 rounded w-full"
@@ -151,6 +231,7 @@ export default function ProductsPage() {
         />
 
         <input
+          type="number"
           className="border p-3 rounded w-full"
           placeholder="Price"
           value={price}
@@ -158,32 +239,42 @@ export default function ProductsPage() {
         />
 
         <textarea
-          className="border p-3 rounded w-full"
           rows={5}
-          placeholder="Description"
+          className="border p-3 rounded w-full"
+          placeholder="Product Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
 
+        {/* AI Button */}
+
         <button
           onClick={generateDescription}
           disabled={loadingAI}
-          className="bg-purple-600 text-white px-5 py-3 rounded w-full"
+          className={`w-full py-3 rounded text-white font-semibold ${
+            loadingAI
+              ? "bg-gray-500 cursor-not-allowed"
+              : "bg-purple-600 hover:bg-purple-700"
+          }`}
         >
-          {loadingAI ? "Generating AI Description..." : "Generate AI Description"}
+          {loadingAI
+            ? "Generating AI Description..."
+            : "Generate AI Description"}
         </button>
+
+        {/* Add / Update */}
 
         {editingId ? (
           <button
             onClick={updateProduct}
-            className="bg-green-600 text-white px-5 py-3 rounded w-full"
+            className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded font-semibold"
           >
             Update Product
           </button>
         ) : (
           <button
             onClick={addProduct}
-            className="bg-blue-600 text-white px-5 py-3 rounded w-full"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded font-semibold"
           >
             Add Product
           </button>
@@ -191,50 +282,78 @@ export default function ProductsPage() {
 
       </div>
 
+      {/* Products */}
+
       <h2 className="text-3xl font-bold mt-10 mb-5">
         Products
       </h2>
 
-      {products.map((product: any) => (
-        <div
-          key={product._id}
-          className="border rounded-lg p-5 mb-4 shadow"
-        >
-          <h3 className="text-xl font-bold">
-            {product.name}
+      {products.length === 0 ? (
+
+        <div className="bg-gray-100 rounded-lg p-10 text-center shadow">
+
+          <h3 className="text-2xl font-semibold">
+            No Products Available
           </h3>
 
-          <p>
-            <strong>Category:</strong> {product.category}
+          <p className="text-gray-500 mt-2">
+            Add your first product to get started.
           </p>
 
-          <p>
-            <strong>Price:</strong> ₹{product.price}
-          </p>
-
-          <p className="mt-2">
-            {product.description}
-          </p>
-
-          <div className="mt-4 space-x-3">
-
-            <button
-              onClick={() => editProduct(product)}
-              className="bg-yellow-500 text-white px-4 py-2 rounded"
-            >
-              Edit
-            </button>
-
-            <button
-              onClick={() => deleteProduct(product._id)}
-              className="bg-red-600 text-white px-4 py-2 rounded"
-            >
-              Delete
-            </button>
-
-          </div>
         </div>
-      ))}
+
+      ) : (
+
+        <div className="grid md:grid-cols-2 gap-5">
+
+          {products.map((product: any) => (
+
+            <div
+              key={product._id}
+              className="border rounded-lg shadow-lg p-5 bg-white"
+            >
+
+              <h3 className="text-2xl font-bold">
+                {product.name}
+              </h3>
+
+              <p className="mt-2">
+                <strong>Category:</strong> {product.category}
+              </p>
+
+              <p className="mt-1">
+                <strong>Price:</strong> ₹{product.price}
+              </p>
+
+              <p className="mt-3 text-gray-700">
+                {product.description}
+              </p>
+
+              <div className="flex gap-3 mt-5">
+
+                <button
+                  onClick={() => editProduct(product)}
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded"
+                >
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => deleteProduct(product._id)}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded"
+                >
+                  Delete
+                </button>
+
+              </div>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      )}
 
     </div>
   );

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { useTheme } from "../../components/ThemeContext";
+import Link from "next/link";
 
 export default function Login() {
   const { darkMode } = useTheme();
@@ -12,16 +13,44 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (!email || !password) {
-      alert("Please fill all fields");
-      return;
+  if (!email || !password) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      alert("Login Successful!");
+
+      window.location.href = "/products";
+    } else {
+      alert(data.message);
     }
 
-    alert("Login Successful (Demo)");
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Server Error");
+  }
+};
 
   return (
     <div
@@ -116,14 +145,14 @@ export default function Login() {
           </form>
 
           <p className="text-center mt-6">
-
-            Don't have an account?
-
-            <span className="text-orange-500 cursor-pointer ml-2">
-              Register
-            </span>
-
-          </p>
+  Don't have an account?{" "}
+  <Link
+    href="/register"
+    className="text-orange-500 font-semibold hover:underline"
+  >
+    Register
+  </Link>
+</p>
 
         </div>
 
